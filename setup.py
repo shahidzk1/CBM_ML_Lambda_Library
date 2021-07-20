@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 setup(
   name='CBM_ML',
   packages=['CBM_ML'],
@@ -6,5 +6,5 @@ setup(
   description='First ML Python library',
   author='Shahid Khan',
   license='MIT',
-  install_requires=['numpy','uproot','pandas','matplotlib']
+  packages=find_packages()
 )
