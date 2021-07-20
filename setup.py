@@ -1,14 +1,10 @@
 from setuptools import setup
-
 setup(
-  name='ovas',
+  name='ML_Lambda_CBM',
+  packages=['ML_Lambda_CBM'],
   version='1.0',
-  description='Testing installation of Package',
-  url='https://github.com/CBM-ML/hydron-ml',
-  author='Ali Imdad Khan',
-  author_email='ali-imdad.khan@student.uni-tuebingen.de',
+  description='First ML Python library',
+  author='Shahid Khan',
   license='MIT',
-  packages=['ovas'],
   install_requires=['numpy','uproot']
 )
-
