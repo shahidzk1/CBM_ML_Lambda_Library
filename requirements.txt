@@ -1,4 +1,5 @@
-numpy
-pandas
-matplotlib
 uproot
+matplotlib
+pandas
+xgboost
+bayesian-optimization
