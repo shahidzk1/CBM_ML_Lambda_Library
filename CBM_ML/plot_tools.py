@@ -197,3 +197,40 @@ def plt_sig_back(df):
     plt.yscale("log")
     fig.tight_layout()
     fig.savefig("hists.png")
+    
+
+    
+# The following function will display the inavriant mass histogram of the original 10k event set along with the mass histoigram after we apply a cut
+# on the probability prediction of xgb
+def cut_visualization(df, variable,cut, range1=(1.09, 1.19), bins1= 300 ):
+    mask1 = df[variable]>cut
+    df3=df[mask1]
+    
+    fig, ax2 = plt.subplots(figsize=(12, 8), dpi = 300)
+    color = 'tab:blue'
+    ax2.hist(df['mass'],bins = bins1, range=range1, facecolor='blue' ,alpha = 0.35, label='before selection')
+    ax2.set_ylabel('Counts', fontsize = 15, color=color)
+    ax2.tick_params(axis='y', labelcolor=color)
+    ax2.legend( fontsize = 15, loc='upper left')
+    ax2.tick_params(axis='both', which='major', labelsize=15)
+    ax2.grid()
+    ax2.set_xlabel("Mass (GeV/${c^2}$)", fontsize = 18)
+    
+    
+    
+    color = 'tab:red'
+    ax1 = ax2.twinx()
+    ax1.hist(df3['mass'], bins = bins1, range=range1, facecolor='red',alpha = 0.35, label="XGB (with a cut > %.2f"%cut+')')
+    ax1.set_xlabel('Mass in GeV', fontsize = 15)
+    ax1.set_ylabel('Counts ', fontsize = 15, color=color)
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.tick_params(axis='both', which='major', labelsize=15)
+    ax1.legend( fontsize = 18,loc='upper right' )
+
+    plt.title("The original sample's Invariant Mass along with mass after selection of XGB", fontsize = 15)
+    plt.text(1.14, 8000, 'CBM Performance', fontsize=18)
+    plt.text(1.14, 7000, 'URQMD, Au+Au @ 12A GeV/$c$', fontsize=18)
+    #plt.text(0.02, 0.1, r'cut > %.4f'%cut, fontsize=15)
+    plt.show()
+    fig.tight_layout()
+    fig.savefig("test_best.png")
