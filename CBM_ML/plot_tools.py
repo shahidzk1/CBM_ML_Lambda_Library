@@ -191,9 +191,6 @@ def plt_sig_back(df):
     #plt.title('Test and Train Lambda Invariant Mass', fontsize = 15)
     plt.legend( fontsize = 15)
     axs.tick_params(axis='both', which='major', labelsize=18)
-    axs.text(1.13, 9500, r'CBM Performance', fontsize=15)
-    axs.text(1.13, 6000, r'DCM-QGSM-SMM, Au+Au @ 12 $A$GeV/$c$', color = 'magenta',  fontsize=15)
-    axs.text(1.13, 4000, r'URQMD, Au+Au @ 12 $A$GeV/$c$', fontsize=15)
     plt.yscale("log")
     fig.tight_layout()
     fig.savefig("hists.png")
@@ -228,8 +225,6 @@ def cut_visualization(df, variable,cut, range1=(1.09, 1.19), bins1= 300 ):
     ax1.legend( fontsize = 18,loc='upper right' )
 
     plt.title("The original sample's Invariant Mass along with mass after selection of XGB", fontsize = 15)
-    plt.text(1.14, 8000, 'CBM Performance', fontsize=18)
-    plt.text(1.14, 7000, 'URQMD, Au+Au @ 12A GeV/$c$', fontsize=18)
     #plt.text(0.02, 0.1, r'cut > %.4f'%cut, fontsize=15)
     plt.show()
     fig.tight_layout()
