@@ -25,54 +25,69 @@ def tree_importer(path,treename, n):
 """
 The quality_cuts_plus_other_cuts function applies quality selection criteria with other selection criteria to reduce data size
 """
-def quality_cuts_plus_other_cuts():
+def quality_cuts_plus_other_cuts_lambda():
     #The following quality selection criteria is applied
-    mass_cut = "(LambdaCandidates_mass > 1.07) &"
+    mass_cut = '('+labels[10]+' > 1.07) &'
     
-    coordinate_cut = "(LambdaCandidates_x>-50) & (LambdaCandidates_x<50) & (LambdaCandidates_y>-50) & (LambdaCandidates_y<50) & (LambdaCandidates_z>-1) & (LambdaCandidates_z<80) &"
+    coordinate_cut = '('+labels[20]+'>-50) & ('+labels[20]+'<50) & ('+labels[21]+'>-50) & ('+labels[21]+'<50) & ('+labels[22]+'>-1) & ('+labels[22]+'<80) &'
     
-    chi_2_positive_cut ="(LambdaCandidates_chi2geo>0) & (LambdaCandidates_chi2topo>0) & (LambdaCandidates_chi2primpos>0) & (LambdaCandidates_chi2primneg > 0) &"
+    chi_2_positive_cut ='('+labels[0]+'>0) & ('+labels[8]+'>0) & ('+labels[2]+'>0) & ('+labels[1]+' > 0) &'
     
-    distance_cut = "(LambdaCandidates_ldl>0) & (LambdaCandidates_l<80) & (LambdaCandidates_distance>0) & (LambdaCandidates_distance<100) &"
+    distance_cut = '('+labels[4]+'>0) & ('+labels[5]+'<80) & ('+labels[3]+'>0) & ('+labels[3]+'<100) &'
     
-    pz_cut = "(LambdaCandidates_pz>0) & "
+    pz_cut = '('+labels[14]+'>0) & '
     #Other cuts
-    pseudo_rapidity_cut_based_on_acceptance = "(LambdaCandidates_eta>1) & (LambdaCandidates_eta<6.5) &"
+    pseudo_rapidity_cut_based_on_acceptance = '('+labels[19]+'>1) & ('+labels[19]+'<6.5) &'
     
-    angular_cut = "(LambdaCandidates_cosineneg>0.1) & (LambdaCandidates_cosinepos>0.1) &"
+    angular_cut = '('+labels[6]+'>0.1) & ('+labels[7]+'>0.1) &'
     
-    data_reducing_cut = "(LambdaCandidates_mass < 1.3) &  (LambdaCandidates_p<20)  &   (LambdaCandidates_chi2geo<1000) &  (LambdaCandidates_chi2primpos<1e6) & (LambdaCandidates_chi2primneg < 3e7) &  (LambdaCandidates_ldl<5000) & (LambdaCandidates_chi2topo < 100000)"
-    
+    data_reducing_cut = '('+labels[10]+'< 1.3) &  ('+labels[15]+'<20)  &   ('+labels[0]+' < 1000) &  ('+labels[2]+'<1e6) & ('+labels[1]+ '< 3e7) &  ('+labels[4]+'<5000) & ('+labels[8]+'< 100000)'
+
     cuts= mass_cut+coordinate_cut+chi_2_positive_cut+distance_cut+pz_cut+pseudo_rapidity_cut_based_on_acceptance+angular_cut+data_reducing_cut
     return cuts
 
 """
-This tree_importer_with_cuts imports tree and also applies quality selection criteria on the data along with some further data reducing cuts.
+Selects the labels only required for lambda analysis
+"""
 
+def labels_lambda(file):
+    find_labels = ['chi2_geo','prim_first','prim_second', 'distance','_dl','_l','cosine_first','cosine_second','chi2_topo','cosine_topo','_mass','_pT','_px','_py','_pz','_p','_phi','_rapidity','_pid','_eta','_x','_y','_z','_generation']
+    labels = []
+    for a in find_labels:
+        for s in file.keys():
+            if a in s:
+                if 'err' not in s:
+                    if s not in labels:
+                        labels.append(s)
+    return labels
+
+"""
+This tree_importer_with_cuts imports tree and also applies quality selection criteria on the data along with some further data reducing cuts.
 """
 
 def tree_importer_with_cuts(path,treename, n):
     
     #This part changes the labels of the root tree's branches 
-    labels=["LambdaCandidates_chi2geo", "LambdaCandidates_chi2primneg", "LambdaCandidates_chi2primpos",
-         "LambdaCandidates_distance", "LambdaCandidates_ldl","LambdaCandidates_mass", "LambdaCandidates_pT",
-            "LambdaCandidates_rapidity", "LambdaCandidates_is_signal"]
     
     new_labels=['chi2geo', 'chi2primneg','chi2primpos', 'distance', 'ldl','mass', 'pT', 'rapidity','issignal']
-    
-    cuts = quality_cuts_plus_other_cuts()
     
     #The number of parallel processors
     executor = ThreadPoolExecutor(n)
     
     #To open the 
     file = uproot.open(path+':'+treename, library='pd', decompression_executor=executor,
-                                  interpretation_executor=executor).arrays(labels,cuts, library='np',decompression_executor=executor,
                                   interpretation_executor=executor)
-    df= pd.DataFrame(data=file)
+    labels = labels_lambda(file)
+    cuts = quality_cuts_plus_other_cuts_lambda(labels)
+    select_labels = [labels[0],labels[1],labels[2],labels[3],labels[4],labels[10],labels[11],labels[18],labels[23]]
+
+    np_arrays = file.arrays(select_labels, cuts, library='np',decompression_executor=executor,
+                                  interpretation_executor=executor)
+    df= pd.DataFrame(data=np_arrays)
     df.columns = new_labels
     #df['issignal']=((df['issignal']>0)*1)
     with pd.option_context('mode.use_inf_as_na', True):
         df = df.dropna()
     return df
+
 
