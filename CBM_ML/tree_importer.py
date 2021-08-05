@@ -19,6 +19,8 @@ def tree_importer(path,treename, n):
                                   interpretation_executor=executor).arrays(library='np',decompression_executor=executor,
                                   interpretation_executor=executor)
     df= pd.DataFrame(data=file)
+    with pd.option_context('mode.use_inf_as_na', True):
+        df = df.dropna()
     return df
 
 
