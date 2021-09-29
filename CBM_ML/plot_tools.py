@@ -1,6 +1,7 @@
 from sklearn.metrics import roc_auc_score, roc_curve
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 from numpy import sqrt, log, argmax
 import itertools
 
@@ -59,40 +60,56 @@ Its input are a data-frame, predictions of the classifier (probabilities) and th
 inside this probability.
 """
 
-def preds_prob(df, preds, true, dataset):
-    if dataset =='train':
-        label1 = 'XGB Predictions on the training data set'
-    else:
-        label1 = 'XGB Predictions on the test data set'
+def preds_prob(df,preds,true,df1,preds1, true1):
     fig, ax = plt.subplots(figsize=(12, 8))
     bins1=100
-    plt.hist(df[preds], bins=bins1,facecolor='green',alpha = 0.3, label=label1)
     TP = df[(df[true]==1)]
     TN = df[(df[true]==0)]
-    #TP[preds].plot.hist(ax=ax, bins=bins1,facecolor='blue', histtype='stepfilled',alpha = 0.3, label='True Positives/signal in predictions')
-    hist, bins = np.histogram(TP[preds], bins=bins1)
+    
+    plt.hist(TN[preds], bins=bins1,facecolor='blue',alpha = 0.3, label='background in train')
+    plt.hist(TP[preds], bins=bins1,facecolor='red',alpha = 0.3, label='signal in train')
+    
+    
+    TP1 = df1[(df1[true1]==1)]
+    TN1 = df1[(df1[true1]==0)]
+    
+    hist1, bins1 = np.histogram(TN1[preds1], bins=bins1)
+    err1 = np.sqrt(hist1)
+    center1 = (bins1[:-1] + bins1[1:]) / 2
+    plt.errorbar(center1, hist1, yerr=err1, fmt='o',
+                 c='blue', label='signal in test')
+    
+    hist, bins = np.histogram(TP1[preds1], bins=bins1)
     err = np.sqrt(hist)
     center = (bins[:-1] + bins[1:]) / 2
+    plt.errorbar(center, hist, yerr=err, fmt='o',
+                 c='red', label='background in test')
+    
+    #ax.annotate('cut on probability', xy=(0, 90),  xycoords='data',xytext=(0.25,0.5), textcoords='axes fraction',
+                #fontsize=15,arrowprops=dict(facecolor='black', shrink=0.05),horizontalalignment='right', verticalalignment='top')
+    
 
     
-    hist1, bins1 = np.histogram(TN[preds], bins=bins1)
-    err1 = np.sqrt(hist1)
-    plt.errorbar(center, hist1, yerr=err1, fmt='o',
-                 c='Red', label='Background in predictions')
-    
-    plt.errorbar(center, hist, yerr=err, fmt='o',
-                 c='blue', label='Signal in predictions')
+    if df[true].unique().shape[0]>2:
+        TP2= df[df[true]>1]
+        plt.hist(TP2[preds], bins=bins1,facecolor='green',alpha = 0.3, label='secondaries in train')
+        TP2= df1[df1[true1]>1]
+        hist2, bins2 = np.histogram(TP2[preds1], bins=bins1)
+        center2 = (bins2[:-1] + bins2[1:]) / 2
+        err2 = np.sqrt(hist2)
+        plt.errorbar(center2, hist2,yerr=err2, fmt='o',c='green',label='secondaries in test')
+
     
     ax.set_yscale('log')
-    plt.xlabel('Probability',fontsize=18)
+    ax.set_xlabel('Probability',fontsize=18)
     plt.ylabel('Counts', fontsize=18)
-    plt.legend(fontsize=18)
     ax.set_xticks(np.arange(0,1.1,0.1))
     ax.tick_params(axis='both', which='major', labelsize=18)
     ax.tick_params(axis='both', which='minor', labelsize=16)
-    plt.show()
+    plt.legend(fontsize=18)
+    fig.show()
     fig.tight_layout()
-    fig.savefig('test_best.png')
+    return fig, ax
 
     
 """
@@ -142,7 +159,7 @@ def plot_confusion_matrix(cm, classes,
 """
 The function comparison compares the results of XGB and KFPF (manual selection cuts)
 """
-from matplotlib import gridspec
+
 def comaprison_XGB_KFPF(XGB_mass,KFPF_mass):
     range1= (1.0999, 1.17)
     fig, axs = plt.subplots(2, 1,figsize=(15,10), sharex=True,  gridspec_kw={'width_ratios': [10],
