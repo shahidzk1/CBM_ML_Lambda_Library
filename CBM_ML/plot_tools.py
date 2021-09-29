@@ -20,6 +20,8 @@ def AMS(y_true, y_predict, y_true1, y_predict1):
     S0 = S0[~np.isnan(S0)]
     xi = argmax(S0)
     S0_best_threshold = (thresholds[xi])
+    if S0_best_threshold>1:
+        S0_best_threshold = 1- S0_best_threshold
 
     roc_auc1=roc_auc_score(y_true1, y_predict1)
     fpr1, tpr1, thresholds1 = roc_curve(y_true1, y_predict1,drop_intermediate=False ,pos_label=1)
@@ -27,6 +29,8 @@ def AMS(y_true, y_predict, y_true1, y_predict1):
     S01 = S01[~np.isnan(S01)]
     xi1 = argmax(S01)
     S0_best_threshold1 = (thresholds[xi1])
+    if S0_best_threshold1>1:
+        S0_best_threshold1 = 1- S0_best_threshold1
 
     fig, ax = plt.subplots(figsize=(12, 8), dpi = 100)
     plt.plot(fpr, tpr, linewidth=3 ,linestyle=':',color='darkorange',label='ROC curve train (area = %0.4f)' % roc_auc)
